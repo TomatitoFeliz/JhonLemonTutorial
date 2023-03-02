@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody m_Rigidbody;
     AudioSource m_AudioSource;
     Vector3 m_Movement;
+    Vector2 inputMovement;
     Quaternion m_Rotation = Quaternion.identity;
 
     void Start()
@@ -21,14 +23,15 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        float horizontal = inputMovement.x;
+        float vertical = inputMovement.y;
 
         m_Movement.Set(horizontal, 0f, vertical);
         m_Movement.Normalize();
 
         bool hasHorizontalInput = !Mathf.Approximately(horizontal, 0f);
         bool hasVerticalInput = !Mathf.Approximately(vertical, 0f);
+
         bool isWalking = hasHorizontalInput || hasVerticalInput;
         m_Animator.SetBool("IsWalking", isWalking);
 
@@ -51,5 +54,12 @@ public class PlayerMovement : MonoBehaviour
     {
         m_Rigidbody.MovePosition(m_Rigidbody.position + m_Movement * m_Animator.deltaPosition.magnitude);
         m_Rigidbody.MoveRotation(m_Rotation);
+    }
+    public void OnMovement(InputAction.CallbackContext value)
+    {
+        inputMovement = value.ReadValue<Vector2>();
+
+        m_Movement.Set(inputMovement.x, 0f, inputMovement.y);
+        m_Movement.Normalize();
     }
 }
